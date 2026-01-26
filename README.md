@@ -13,7 +13,7 @@ Key features:
 - **Spatial Registration**: Register services at specific geographic locations (spheres)
 - **Federated Architecture**: Servers can peer with each other and refer queries
 - **Identity Federation**: Users can authenticate across servers using cryptographic signatures
-- **Privacy Controls**: The `foad` (Fuck Off And Die) flag hides registrations from searches
+- **Privacy Controls**: The `foad` (Fade Out And Disappear) flag hides registrations from searches
 
 ## Quick Start
 
