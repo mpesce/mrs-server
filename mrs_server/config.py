@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     database_path: str = "./mrs.db"
 
     # Server options
+    host: str = "0.0.0.0"
+    port: int = 8000
     max_radius: float = 1_000_000  # meters (1000km max)
     max_results: int = 100
     max_registrations_per_user: int = 0  # 0 = unlimited

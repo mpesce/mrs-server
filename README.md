@@ -40,6 +40,19 @@ python -m mrs_server.main
 
 The server will start at `http://localhost:8000`. Visit `http://localhost:8000/docs` for interactive API documentation.
 
+### Command Line Options
+
+```bash
+# Run on a specific port
+python -m mrs_server.main --port 9000
+
+# Run on a specific host and port
+python -m mrs_server.main --host 127.0.0.1 --port 9000
+
+# Enable auto-reload for development
+python -m mrs_server.main --reload
+```
+
 ### Configuration
 
 Configure via environment variables (prefix `MRS_`):
@@ -50,6 +63,10 @@ export MRS_SERVER_URL="https://your-domain.com"
 export MRS_SERVER_DOMAIN="your-domain.com"
 export MRS_ADMIN_EMAIL="admin@your-domain.com"
 
+# Network
+export MRS_HOST="0.0.0.0"
+export MRS_PORT="8000"
+
 # Database
 export MRS_DATABASE_PATH="./mrs.db"
 
@@ -57,7 +74,7 @@ export MRS_DATABASE_PATH="./mrs.db"
 export MRS_BOOTSTRAP_PEERS='["https://peer1.example.com", "https://peer2.example.com"]'
 ```
 
-Or create a `.env` file in the project root.
+Or create a `.env` file in the project root. Command line arguments override environment variables.
 
 ## API Usage
 

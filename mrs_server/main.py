@@ -4,6 +4,7 @@ MRS Server - Metaverse Registry System
 A federated spatial registry protocol implementation.
 """
 
+import argparse
 import logging
 from contextlib import asynccontextmanager
 
@@ -100,11 +101,35 @@ async def health_check():
 
 def run():
     """Run the server using uvicorn."""
+    parser = argparse.ArgumentParser(description="MRS Server - Metaverse Registry System")
+    parser.add_argument(
+        "-p", "--port",
+        type=int,
+        default=None,
+        help=f"Port to listen on (default: {settings.port}, or MRS_PORT env var)"
+    )
+    parser.add_argument(
+        "-H", "--host",
+        type=str,
+        default=None,
+        help=f"Host to bind to (default: {settings.host}, or MRS_HOST env var)"
+    )
+    parser.add_argument(
+        "--reload",
+        action="store_true",
+        help="Enable auto-reload for development"
+    )
+    args = parser.parse_args()
+
+    # Command line args override config/env vars
+    host = args.host if args.host is not None else settings.host
+    port = args.port if args.port is not None else settings.port
+
     uvicorn.run(
         "mrs_server.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
+        host=host,
+        port=port,
+        reload=args.reload,
     )
 
 
