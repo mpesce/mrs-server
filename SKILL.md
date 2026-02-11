@@ -1,29 +1,36 @@
 ---
 name: mrs-server-dev
-description: "Work on the MRS server (FastAPI + SQLite): API changes, auth/validation, search behavior, tests, and release-readiness checks. Use when modifying server endpoints, contracts, or server-side security policy."
+description: Work on the Mixed Reality Service server codebase. Use for FastAPI endpoint changes, server-side validation/auth updates, search/register/release contract changes, database-layer behavior, and server test/release hardening.
 ---
 
-# MRS Server Dev Skill
+# MRS Server Dev
 
-## Use this workflow
-1. Activate env: `source .venv/bin/activate`
-2. Run tests first: `pytest -q`
-3. Make focused change
-4. Re-run tests
-5. Verify local server behavior with curl for changed endpoint
+1. Activate virtual environment.
+   - `source .venv/bin/activate`
 
-## Project specifics
-- Stack: FastAPI, Pydantic v2, SQLite
-- Entry point: `python -m mrs_server.main`
-- DB init: `python scripts/init_db.py`
-- Key contracts: `/register`, `/release`, `/search`, `/.well-known/mrs`
+2. Run server tests before changes.
+   - `pytest -q`
 
-## Security-critical rules
-- Treat `service_point` as untrusted input.
-- Keep strict URI validation in sync with client policy.
-- Never weaken auth/ownership checks without explicit rationale + tests.
+3. Implement focused server-side changes only.
+   - Keep API contracts stable unless explicitly requested.
+   - Treat `service_point` as untrusted input.
 
-## Required checks before shipping
-- `pytest -q` passes
-- `/search` result schema includes required fields expected by client
-- invalid `service_point` samples are rejected
+4. Re-run tests after edits.
+   - `pytest -q`
+
+5. Verify changed endpoints manually.
+   - Start server: `python -m mrs_server.main --host 127.0.0.1 --port 8000`
+   - Exercise changed endpoint(s) with `curl`.
+
+6. Confirm release gates when requested.
+   - Use workspace harnesses from `../scripts/` as directed.
+
+## Critical contracts
+- `/register`
+- `/release`
+- `/search`
+- `/.well-known/mrs`
+
+## Security rules
+- Reject malformed or unsafe `service_point` URIs.
+- Do not weaken auth/ownership checks without explicit approval and tests.
