@@ -78,6 +78,9 @@ class Registration(BaseModel):
     service_point: str | None
     foad: bool
     owner: str
+    origin_server: str | None = None
+    origin_id: str | None = None
+    version: int = 1
     created: datetime
     updated: datetime
 
@@ -123,6 +126,9 @@ class SearchResult(BaseModel):
     foad: bool
     distance: float = Field(description="Distance from query point in meters")
     owner: str
+    origin_server: str | None = None
+    origin_id: str | None = None
+    version: int = 1
     created: datetime
     updated: datetime
 

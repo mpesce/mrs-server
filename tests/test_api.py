@@ -107,6 +107,46 @@ class TestRegistration:
         assert data["status"] == "registered"
         assert data["registration"]["id"].startswith("reg_")
         assert data["registration"]["owner"] == test_user["identity"]
+        assert data["registration"]["origin_server"]
+        assert data["registration"]["origin_id"] == data["registration"]["id"]
+        assert data["registration"]["version"] == 1
+
+    def test_update_registration_increments_version(self, client, auth_headers):
+        """Update should increment registration version."""
+        create = client.post(
+            "/register",
+            headers=auth_headers,
+            json={
+                "space": {
+                    "type": "sphere",
+                    "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                    "radius": 50,
+                },
+                "service_point": "https://example.com/v1",
+                "foad": False,
+            },
+        )
+        assert create.status_code == 201
+        reg = create.json()["registration"]
+        assert reg["version"] == 1
+
+        update = client.put(
+            f"/register/{reg['id']}",
+            headers=auth_headers,
+            json={
+                "space": {
+                    "type": "sphere",
+                    "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                    "radius": 60,
+                },
+                "service_point": "https://example.com/v2",
+                "foad": False,
+            },
+        )
+        assert update.status_code == 200
+        updated = update.json()["registration"]
+        assert updated["version"] == 2
+        assert updated["origin_id"] == reg["origin_id"]
 
     def test_register_space_foad(self, client, auth_headers):
         """Should be able to register with foad=true and no service_point."""
@@ -295,6 +335,9 @@ class TestSearch:
 
         # Verify new fields are present and match registration
         assert result["owner"] == reg_data["owner"]
+        assert result["origin_server"] == reg_data["origin_server"]
+        assert result["origin_id"] == reg_data["origin_id"]
+        assert result["version"] == reg_data["version"]
         assert result["created"] == reg_data["created"]
         assert result["updated"] == reg_data["updated"]
 
@@ -357,6 +400,9 @@ class TestSearch:
         result = results[0]
         # Verify all required fields are present
         assert "owner" in result
+        assert "origin_server" in result
+        assert "origin_id" in result
+        assert "version" in result
         assert "created" in result
         assert "updated" in result
         assert "id" in result
@@ -368,6 +414,9 @@ class TestSearch:
         # Verify values match the registration
         reg_data = reg_response.json()["registration"]
         assert result["owner"] == reg_data["owner"]
+        assert result["origin_server"] == reg_data["origin_server"]
+        assert result["origin_id"] == reg_data["origin_id"]
+        assert result["version"] == reg_data["version"]
         assert result["created"] == reg_data["created"]
         assert result["updated"] == reg_data["updated"]
 

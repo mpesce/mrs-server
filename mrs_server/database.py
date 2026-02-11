@@ -31,6 +31,11 @@ CREATE TABLE IF NOT EXISTS registrations (
     service_point TEXT,                     -- URI, null if foad=true
     foad INTEGER NOT NULL DEFAULT 0,        -- boolean: 1=true, 0=false
 
+    -- Canonical federation metadata
+    origin_server TEXT NOT NULL,
+    origin_id TEXT NOT NULL,
+    version INTEGER NOT NULL DEFAULT 1,
+
     -- Metadata
     created_at TEXT NOT NULL,               -- ISO 8601
     updated_at TEXT NOT NULL,               -- ISO 8601
@@ -104,6 +109,32 @@ CREATE TABLE IF NOT EXISTS server_config (
 """
 
 
+def _ensure_registration_columns(conn: sqlite3.Connection) -> None:
+    """Ensure backward-compatible presence of newer registrations columns."""
+    cur = conn.execute("PRAGMA table_info(registrations)")
+    cols = {row[1] for row in cur.fetchall()}
+
+    if "origin_server" not in cols:
+        conn.execute(
+            "ALTER TABLE registrations ADD COLUMN origin_server TEXT NOT NULL DEFAULT ''"
+        )
+    if "origin_id" not in cols:
+        conn.execute(
+            "ALTER TABLE registrations ADD COLUMN origin_id TEXT NOT NULL DEFAULT ''"
+        )
+    if "version" not in cols:
+        conn.execute(
+            "ALTER TABLE registrations ADD COLUMN version INTEGER NOT NULL DEFAULT 1"
+        )
+
+    # Backfill defaults for legacy rows
+    conn.execute(
+        "UPDATE registrations SET origin_server = '' WHERE origin_server IS NULL"
+    )
+    conn.execute("UPDATE registrations SET origin_id = id WHERE origin_id IS NULL OR origin_id = ''")
+    conn.execute("UPDATE registrations SET version = 1 WHERE version IS NULL OR version < 1")
+
+
 def init_database(db_path: str | Path) -> None:
     """Initialize the database with the MRS schema."""
     global _db_path, _connection
@@ -117,6 +148,7 @@ def init_database(db_path: str | Path) -> None:
 
     # Create schema
     _connection.executescript(SCHEMA)
+    _ensure_registration_columns(_connection)
     _connection.commit()
 
 

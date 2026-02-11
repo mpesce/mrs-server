@@ -73,6 +73,10 @@ async def create_registration(
     now_str = now.isoformat()
 
     # Insert registration
+    origin_server = settings.server_url
+    origin_id = reg_id
+    version = 1
+
     with get_cursor() as cursor:
         cursor.execute(
             """
@@ -80,9 +84,10 @@ async def create_registration(
                 id, owner, geo_type,
                 center_lat, center_lon, center_ele, radius,
                 service_point, foad,
+                origin_server, origin_id, version,
                 created_at, updated_at,
                 bbox_min_lat, bbox_max_lat, bbox_min_lon, bbox_max_lon
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 reg_id,
@@ -94,6 +99,9 @@ async def create_registration(
                 request.space.radius,
                 request.service_point,
                 int(request.foad),
+                origin_server,
+                origin_id,
+                version,
                 now_str,
                 now_str,
                 bbox.min_lat,
@@ -110,6 +118,9 @@ async def create_registration(
         service_point=request.service_point,
         foad=request.foad,
         owner=user.id,
+        origin_server=origin_server,
+        origin_id=origin_id,
+        version=version,
         created=now,
         updated=now,
     )
@@ -131,7 +142,7 @@ async def update_registration(
     # Fetch existing registration
     with get_cursor() as cursor:
         cursor.execute(
-            "SELECT owner, created_at FROM registrations WHERE id = ?",
+            "SELECT owner, created_at, origin_server, origin_id, version FROM registrations WHERE id = ?",
             (reg_id,),
         )
         row = cursor.fetchone()
@@ -145,6 +156,9 @@ async def update_registration(
             )
 
         created_at = row["created_at"]
+        origin_server = row["origin_server"]
+        origin_id = row["origin_id"]
+        current_version = int(row["version"])
 
     # Validate service_point
     if not request.foad and not request.service_point:
@@ -173,6 +187,7 @@ async def update_registration(
                 geo_type = ?,
                 center_lat = ?, center_lon = ?, center_ele = ?, radius = ?,
                 service_point = ?, foad = ?,
+                version = version + 1,
                 updated_at = ?,
                 bbox_min_lat = ?, bbox_max_lat = ?, bbox_min_lon = ?, bbox_max_lon = ?
             WHERE id = ?
@@ -201,6 +216,9 @@ async def update_registration(
         service_point=request.service_point,
         foad=request.foad,
         owner=user.id,
+        origin_server=origin_server,
+        origin_id=origin_id,
+        version=current_version + 1,
         created=datetime.fromisoformat(created_at),
         updated=now,
     )
@@ -254,6 +272,9 @@ def _row_to_registration(row) -> Registration:
         service_point=row["service_point"],
         foad=bool(row["foad"]),
         owner=row["owner"],
+        origin_server=row["origin_server"],
+        origin_id=row["origin_id"],
+        version=int(row["version"]),
         created=datetime.fromisoformat(row["created_at"]),
         updated=datetime.fromisoformat(row["updated_at"]),
     )
