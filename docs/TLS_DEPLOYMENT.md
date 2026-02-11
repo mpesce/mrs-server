@@ -105,20 +105,26 @@ server {
 
 ## Verification checklist
 
-1. HTTPS endpoint works:
+1. One-command TLS verification:
+
+```bash
+./scripts/verify-tls.sh mrs.example.com https://mrs.example.com
+```
+
+2. HTTPS endpoint works:
 
 ```bash
 curl -fsS https://mrs.example.com/.well-known/mrs | jq .
 ```
 
-2. Redirect from HTTP to HTTPS works:
+3. Redirect from HTTP to HTTPS works:
 
 ```bash
 curl -I http://mrs.example.com/
 ```
 
-3. Well-known server URL is HTTPS:
+4. Well-known server URL is HTTPS:
 - `/.well-known/mrs` → `server` should be `https://mrs.example.com`
 
-4. Direct app port is not publicly exposed:
+5. Direct app port is not publicly exposed:
 - `127.0.0.1:8000` only
