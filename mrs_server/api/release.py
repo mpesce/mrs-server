@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
 
 from mrs_server.auth import get_current_user
+from mrs_server.config import settings
 from mrs_server.database import get_cursor
 from mrs_server.models import ReleaseRequest, ReleaseResponse, UserInfo
 
@@ -35,6 +36,17 @@ async def release_registration(
         if row["owner"] != user.id:
             raise HTTPException(
                 status_code=403, detail="Not authorized to release this registration"
+            )
+
+        if row["origin_server"] != settings.server_url:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "error": "not_authoritative",
+                    "message": "This server is not authoritative for the registration",
+                    "origin_server": row["origin_server"],
+                    "origin_id": row["origin_id"],
+                },
             )
 
         deleted_at = datetime.now(timezone.utc).isoformat()

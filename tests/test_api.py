@@ -1,6 +1,10 @@
 """Tests for MRS API endpoints."""
 
+from datetime import datetime, timezone
+
 import pytest
+
+from mrs_server.database import get_cursor
 
 
 class TestRootEndpoints:
@@ -148,6 +152,63 @@ class TestRegistration:
         assert updated["version"] == 2
         assert updated["origin_id"] == reg["origin_id"]
 
+    def test_update_non_authoritative_registration_rejected(self, client, auth_headers):
+        """Should reject updates for replicated (non-authoritative) registrations."""
+        now = datetime.now(timezone.utc).isoformat()
+        with get_cursor() as cur:
+            cur.execute("SELECT id FROM users WHERE id = (SELECT user_id FROM tokens LIMIT 1)")
+            owner = cur.fetchone()["id"]
+            cur.execute(
+                """
+                INSERT INTO registrations (
+                    id, owner, geo_type,
+                    center_lat, center_lon, center_ele, radius,
+                    service_point, foad,
+                    origin_server, origin_id, version,
+                    created_at, updated_at,
+                    bbox_min_lat, bbox_max_lat, bbox_min_lon, bbox_max_lon
+                ) VALUES (?, ?, 'sphere', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    "reg_replica_1",
+                    owner,
+                    -33.8568,
+                    151.2153,
+                    0.0,
+                    50.0,
+                    "https://example.com/replica",
+                    0,
+                    "https://origin.example",
+                    "reg_origin_1",
+                    3,
+                    now,
+                    now,
+                    -33.8573,
+                    -33.8563,
+                    151.2148,
+                    151.2158,
+                ),
+            )
+
+        response = client.put(
+            "/register/reg_replica_1",
+            headers=auth_headers,
+            json={
+                "space": {
+                    "type": "sphere",
+                    "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                    "radius": 60,
+                },
+                "service_point": "https://example.com/new",
+                "foad": False,
+            },
+        )
+        assert response.status_code == 409
+        detail = response.json()["detail"]
+        assert detail["error"] == "not_authoritative"
+        assert detail["origin_server"] == "https://origin.example"
+        assert detail["origin_id"] == "reg_origin_1"
+
     def test_register_space_foad(self, client, auth_headers):
         """Should be able to register with foad=true and no service_point."""
         response = client.post(
@@ -274,6 +335,55 @@ class TestRelease:
         )
         assert response.status_code == 200
         assert response.json()["status"] == "released"
+
+    def test_release_non_authoritative_registration_rejected(self, client, auth_headers):
+        """Should reject release for replicated (non-authoritative) registrations."""
+        now = datetime.now(timezone.utc).isoformat()
+        with get_cursor() as cur:
+            cur.execute("SELECT id FROM users WHERE id = (SELECT user_id FROM tokens LIMIT 1)")
+            owner = cur.fetchone()["id"]
+            cur.execute(
+                """
+                INSERT INTO registrations (
+                    id, owner, geo_type,
+                    center_lat, center_lon, center_ele, radius,
+                    service_point, foad,
+                    origin_server, origin_id, version,
+                    created_at, updated_at,
+                    bbox_min_lat, bbox_max_lat, bbox_min_lon, bbox_max_lon
+                ) VALUES (?, ?, 'sphere', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    "reg_replica_2",
+                    owner,
+                    -33.8568,
+                    151.2153,
+                    0.0,
+                    50.0,
+                    "https://example.com/replica2",
+                    0,
+                    "https://origin.example",
+                    "reg_origin_2",
+                    2,
+                    now,
+                    now,
+                    -33.8573,
+                    -33.8563,
+                    151.2148,
+                    151.2158,
+                ),
+            )
+
+        response = client.post(
+            "/release",
+            headers=auth_headers,
+            json={"id": "reg_replica_2"},
+        )
+        assert response.status_code == 409
+        detail = response.json()["detail"]
+        assert detail["error"] == "not_authoritative"
+        assert detail["origin_server"] == "https://origin.example"
+        assert detail["origin_id"] == "reg_origin_2"
 
     def test_release_nonexistent(self, client, auth_headers):
         """Should fail to release nonexistent registration."""

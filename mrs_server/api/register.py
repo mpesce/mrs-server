@@ -155,6 +155,17 @@ async def update_registration(
                 status_code=403, detail="Not authorized to update this registration"
             )
 
+        if row["origin_server"] != settings.server_url:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "error": "not_authoritative",
+                    "message": "This server is not authoritative for the registration",
+                    "origin_server": row["origin_server"],
+                    "origin_id": row["origin_id"],
+                },
+            )
+
         created_at = row["created_at"]
         origin_server = row["origin_server"]
         origin_id = row["origin_id"]
