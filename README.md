@@ -217,6 +217,8 @@ ruff check .
 
 ## Federation
 
+> Consistency planning doc: [`docs/FEDERATION_CONSISTENCY_RFC.md`](docs/FEDERATION_CONSISTENCY_RFC.md)
+
 MRS servers can federate with each other:
 
 1. **Bootstrap Peers**: Configure trusted peers in `MRS_BOOTSTRAP_PEERS`
