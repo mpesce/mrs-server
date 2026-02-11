@@ -1,6 +1,6 @@
 ---
 name: mrs-server-dev
-description: Work on the MRS server (FastAPI + SQLite): API changes, auth/validation, search behavior, tests, and release-readiness checks. Use when modifying server endpoints, contracts, or server-side security policy.
+description: "Work on the MRS server (FastAPI + SQLite): API changes, auth/validation, search behavior, tests, and release-readiness checks. Use when modifying server endpoints, contracts, or server-side security policy."
 ---
 
 # MRS Server Dev Skill
