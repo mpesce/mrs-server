@@ -28,6 +28,8 @@ cd mrs-server
 
 For a short walkthrough, see [QUICKSTART.md](QUICKSTART.md).
 
+For static read-only export (Level 0), see [`docs/STATIC_LEVEL0.md`](docs/STATIC_LEVEL0.md).
+
 ### Installation (manual)
 
 ```bash
