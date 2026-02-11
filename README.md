@@ -68,7 +68,7 @@ python -m mrs_server.main --reload
 
 Configure via environment variables (prefix `MRS_`):
 
-> Production note: terminate TLS at a reverse proxy (Apache/Caddy/Nginx) and keep `mrs-server` on `127.0.0.1:8000`. See [`docs/TLS_DEPLOYMENT.md`](docs/TLS_DEPLOYMENT.md).
+> Production note: terminate TLS at a reverse proxy (Apache/Caddy/Nginx) and keep `mrs-server` on `127.0.0.1:8000`. See [`docs/TLS_DEPLOYMENT.md`](docs/TLS_DEPLOYMENT.md). After deployment, validate with `./scripts/verify-tls.sh <domain> https://<domain>`.
 
 ```bash
 # Server identity

@@ -21,6 +21,12 @@ Check endpoints:
 - `http://127.0.0.1:8000/docs`
 - `http://127.0.0.1:8000/.well-known/mrs`
 
+For production TLS deployments behind a reverse proxy, verify with:
+
+```bash
+./scripts/verify-tls.sh mrs.example.com https://mrs.example.com
+```
+
 Create a user/token:
 
 ```bash
