@@ -107,6 +107,9 @@ curl -X POST http://localhost:8000/auth/login \
 
 ### Register a Space
 
+`service_point` is strictly validated for safety. It must be a well-formed `https://` URI and must not include credentials, fragments, control characters, or whitespace.
+
+
 ```bash
 curl -X POST http://localhost:8000/register \
   -H "Content-Type: application/json" \
