@@ -1,13 +1,13 @@
 # MRS Server
 
-**Metaverse Registry System** - A federated spatial registry protocol
+**Mixed Reality Service** - A federated spatial registry protocol
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
 ## Overview
 
-MRS (Metaverse Registry System) is a federated protocol for registering and discovering services associated with physical locations. Think of it as "DNS for physical space" - it allows agents, applications, and devices to query what services or metadata are associated with any geographic location.
+MRS (Mixed Reality Service) is a federated protocol for registering and discovering services associated with physical locations. Think of it as "DNS for physical space" - it allows agents, applications, and devices to query what services or metadata are associated with any geographic location.
 
 Key features:
 - **Spatial Registration**: Register services at specific geographic locations (spheres)

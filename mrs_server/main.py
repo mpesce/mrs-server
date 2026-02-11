@@ -1,5 +1,5 @@
 """
-MRS Server - Metaverse Registry System
+MRS Server - Mixed Reality Service
 
 A federated spatial registry protocol implementation.
 """
@@ -62,7 +62,7 @@ async def lifespan(app: FastAPI):
 # Create the FastAPI application
 app = FastAPI(
     title="MRS Server",
-    description="Metaverse Registry System - A federated spatial registry protocol",
+    description="Mixed Reality Service - A federated spatial registry protocol",
     version=__version__,
     lifespan=lifespan,
     docs_url="/docs",
@@ -101,7 +101,7 @@ async def health_check():
 
 def run():
     """Run the server using uvicorn."""
-    parser = argparse.ArgumentParser(description="MRS Server - Metaverse Registry System")
+    parser = argparse.ArgumentParser(description="MRS Server - Mixed Reality Service")
     parser.add_argument(
         "-p", "--port",
         type=int,

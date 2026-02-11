@@ -1,5 +1,5 @@
 """
-MRS Server - Metaverse Registry System
+MRS Server - Mixed Reality Service
 
 A federated spatial registry protocol implementation.
 """
