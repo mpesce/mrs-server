@@ -120,6 +120,9 @@ class SearchResult(BaseModel):
     service_point: str | None
     foad: bool
     distance: float = Field(description="Distance from query point in meters")
+    owner: str
+    created: datetime
+    updated: datetime
 
 
 class Referral(BaseModel):

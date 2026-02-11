@@ -231,7 +231,7 @@ class TestSearch:
     def test_search_finds_registration(self, client, auth_headers):
         """Search should find nearby registrations."""
         # Create a registration
-        client.post(
+        reg_response = client.post(
             "/register",
             headers=auth_headers,
             json={
@@ -243,6 +243,7 @@ class TestSearch:
                 "service_point": "https://example.com/opera-house",
             },
         )
+        reg_data = reg_response.json()["registration"]
 
         # Search near it
         response = client.post(
@@ -255,7 +256,13 @@ class TestSearch:
         assert response.status_code == 200
         data = response.json()
         assert len(data["results"]) == 1
-        assert data["results"][0]["service_point"] == "https://example.com/opera-house"
+        result = data["results"][0]
+        assert result["service_point"] == "https://example.com/opera-house"
+
+        # Verify new fields are present and match registration
+        assert result["owner"] == reg_data["owner"]
+        assert result["created"] == reg_data["created"]
+        assert result["updated"] == reg_data["updated"]
 
     def test_search_excludes_foad(self, client, auth_headers):
         """Search should not return foad registrations."""
@@ -283,6 +290,52 @@ class TestSearch:
         )
         assert response.status_code == 200
         assert len(response.json()["results"]) == 0
+
+    def test_search_includes_owner_and_timestamps(self, client, auth_headers):
+        """Search results should include owner, created, and updated fields."""
+        # Create a registration
+        reg_response = client.post(
+            "/register",
+            headers=auth_headers,
+            json={
+                "space": {
+                    "type": "sphere",
+                    "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                    "radius": 50,
+                },
+                "service_point": "https://example.com/test-space",
+            },
+        )
+        assert reg_response.status_code == 201
+
+        # Search for it
+        search_response = client.post(
+            "/search",
+            json={
+                "location": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                "range": 100,
+            },
+        )
+        assert search_response.status_code == 200
+        results = search_response.json()["results"]
+        assert len(results) == 1
+
+        result = results[0]
+        # Verify all required fields are present
+        assert "owner" in result
+        assert "created" in result
+        assert "updated" in result
+        assert "id" in result
+        assert "space" in result
+        assert "service_point" in result
+        assert "foad" in result
+        assert "distance" in result
+
+        # Verify values match the registration
+        reg_data = reg_response.json()["registration"]
+        assert result["owner"] == reg_data["owner"]
+        assert result["created"] == reg_data["created"]
+        assert result["updated"] == reg_data["updated"]
 
     def test_search_sorts_by_volume(self, client, auth_headers):
         """Search results should be sorted by volume (smallest first)."""

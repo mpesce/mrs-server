@@ -82,6 +82,9 @@ async def search_registrations(request: SearchRequest) -> SearchResponse:
                 service_point=row["service_point"],
                 foad=bool(row["foad"]),
                 distance=distance,
+                owner=row["owner"],
+                created=row["created_at"],
+                updated=row["updated_at"],
             )
         )
 
