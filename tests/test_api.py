@@ -171,6 +171,40 @@ class TestRegistration:
         )
         assert response.status_code == 422  # Validation error
 
+    def test_register_rejects_non_https_service_point(self, client, auth_headers):
+        """Should reject non-HTTPS service_point URIs."""
+        response = client.post(
+            "/register",
+            headers=auth_headers,
+            json={
+                "space": {
+                    "type": "sphere",
+                    "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                    "radius": 50,
+                },
+                "service_point": "javascript:alert(1)",
+                "foad": False,
+            },
+        )
+        assert response.status_code == 422
+
+    def test_register_rejects_fragment_in_service_point(self, client, auth_headers):
+        """Should reject service_point URIs with fragments."""
+        response = client.post(
+            "/register",
+            headers=auth_headers,
+            json={
+                "space": {
+                    "type": "sphere",
+                    "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                    "radius": 50,
+                },
+                "service_point": "https://example.com/x#prompt",
+                "foad": False,
+            },
+        )
+        assert response.status_code == 422
+
 
 class TestRelease:
     """Tests for release endpoint."""

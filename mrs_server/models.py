@@ -9,6 +9,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
+from mrs_server.validation import validate_service_point_uri
+
 
 # -----------------------------------------------------------------------------
 # Core Geometry Models
@@ -62,10 +64,10 @@ class RegistrationRequest(BaseModel):
     @field_validator("service_point")
     @classmethod
     def validate_service_point(cls, v: str | None, info) -> str | None:
-        # service_point is required unless foad is True
-        # Note: We can't access other fields in field_validator easily,
-        # so this is validated in the endpoint
-        return v
+        # service_point presence vs foad is validated in endpoints.
+        if v is None:
+            return None
+        return validate_service_point_uri(v)
 
 
 class Registration(BaseModel):
