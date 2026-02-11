@@ -1,5 +1,7 @@
 """Release endpoint for MRS."""
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from mrs_server.auth import get_current_user
@@ -22,7 +24,7 @@ async def release_registration(
     with get_cursor() as cursor:
         # Fetch the registration to verify ownership
         cursor.execute(
-            "SELECT owner FROM registrations WHERE id = ?",
+            "SELECT owner, origin_server, origin_id, version FROM registrations WHERE id = ?",
             (request.id,),
         )
         row = cursor.fetchone()
@@ -34,6 +36,26 @@ async def release_registration(
             raise HTTPException(
                 status_code=403, detail="Not authorized to release this registration"
             )
+
+        deleted_at = datetime.now(timezone.utc).isoformat()
+
+        # Record tombstone for sync propagation
+        cursor.execute(
+            """
+            INSERT INTO tombstones (origin_server, origin_id, version, deleted_at)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(origin_server, origin_id)
+            DO UPDATE SET
+                version = excluded.version,
+                deleted_at = excluded.deleted_at
+            """,
+            (
+                row["origin_server"],
+                row["origin_id"],
+                int(row["version"]) + 1,
+                deleted_at,
+            ),
+        )
 
         # Delete the registration
         cursor.execute("DELETE FROM registrations WHERE id = ?", (request.id,))

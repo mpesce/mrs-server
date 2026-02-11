@@ -285,6 +285,66 @@ class TestRelease:
         assert response.status_code == 404
 
 
+class TestSync:
+    """Tests for sync endpoints."""
+
+    def test_sync_snapshot_returns_registrations(self, client, auth_headers):
+        create = client.post(
+            "/register",
+            headers=auth_headers,
+            json={
+                "space": {
+                    "type": "sphere",
+                    "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                    "radius": 50,
+                },
+                "service_point": "https://example.com/sync-a",
+                "foad": False,
+            },
+        )
+        assert create.status_code == 201
+
+        snap = client.get("/sync/snapshot")
+        assert snap.status_code == 200
+        data = snap.json()
+        assert data["status"] == "ok"
+        assert len(data["registrations"]) >= 1
+        reg = data["registrations"][0]
+        assert "origin_server" in reg
+        assert "origin_id" in reg
+        assert "version" in reg
+
+    def test_sync_changes_includes_tombstones(self, client, auth_headers):
+        create = client.post(
+            "/register",
+            headers=auth_headers,
+            json={
+                "space": {
+                    "type": "sphere",
+                    "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                    "radius": 50,
+                },
+                "service_point": "https://example.com/sync-b",
+                "foad": False,
+            },
+        )
+        assert create.status_code == 201
+        reg_id = create.json()["registration"]["id"]
+
+        since = "1970-01-01T00:00:00+00:00"
+        changes_before = client.get("/sync/changes", params={"since": since})
+        assert changes_before.status_code == 200
+        assert any(r["id"] == reg_id for r in changes_before.json()["registrations"])
+
+        rel = client.post("/release", headers=auth_headers, json={"id": reg_id})
+        assert rel.status_code == 200
+
+        changes_after = client.get("/sync/changes", params={"since": since})
+        assert changes_after.status_code == 200
+        tombs = changes_after.json()["tombstones"]
+        assert any(t["origin_id"] == reg_id for t in tombs)
+
+
 class TestSearch:
     """Tests for search endpoint."""
 

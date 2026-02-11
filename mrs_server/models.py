@@ -149,6 +149,37 @@ class SearchResponse(BaseModel):
 
 
 # -----------------------------------------------------------------------------
+# Sync Models
+# -----------------------------------------------------------------------------
+
+
+class SyncSnapshotResponse(BaseModel):
+    """Paginated snapshot response for bootstrap sync."""
+
+    status: Literal["ok"] = "ok"
+    registrations: list[Registration]
+    next_cursor: str | None = None
+
+
+class Tombstone(BaseModel):
+    """Delete event for replicated consistency."""
+
+    origin_server: str
+    origin_id: str
+    version: int
+    deleted_at: datetime
+
+
+class SyncChangesResponse(BaseModel):
+    """Incremental changes response since a cursor."""
+
+    status: Literal["ok"] = "ok"
+    registrations: list[Registration]
+    tombstones: list[Tombstone]
+    next_cursor: str
+
+
+# -----------------------------------------------------------------------------
 # Auth Models
 # -----------------------------------------------------------------------------
 

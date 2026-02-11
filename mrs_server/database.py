@@ -51,6 +51,18 @@ CREATE INDEX IF NOT EXISTS idx_registrations_bbox ON registrations(
     bbox_min_lat, bbox_max_lat, bbox_min_lon, bbox_max_lon
 );
 CREATE INDEX IF NOT EXISTS idx_registrations_owner ON registrations(owner);
+CREATE INDEX IF NOT EXISTS idx_registrations_updated ON registrations(updated_at);
+
+-- Tombstones: propagated deletes for sync consistency
+CREATE TABLE IF NOT EXISTS tombstones (
+    origin_server TEXT NOT NULL,
+    origin_id TEXT NOT NULL,
+    version INTEGER NOT NULL,
+    deleted_at TEXT NOT NULL,
+    PRIMARY KEY (origin_server, origin_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_tombstones_deleted_at ON tombstones(deleted_at);
 
 -- Users: local and federated identities
 CREATE TABLE IF NOT EXISTS users (
