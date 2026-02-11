@@ -17,7 +17,18 @@ Key features:
 
 ## Quick Start
 
-### Installation
+### 90-Second Setup
+
+```bash
+git clone https://github.com/mpesce/mrs-server.git
+cd mrs-server
+./scripts/bootstrap.sh
+./scripts/verify.sh
+```
+
+For a short walkthrough, see [QUICKSTART.md](QUICKSTART.md).
+
+### Installation (manual)
 
 ```bash
 # Clone the repository
