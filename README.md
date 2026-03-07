@@ -148,6 +148,22 @@ curl -X POST http://localhost:8000/release \
   -d '{"id": "reg_abc123..."}'
 ```
 
+### Bulk Export / Import
+
+The server provides localhost-only admin endpoints for full database serialization. These are only accessible from the server itself (127.0.0.1), not through the reverse proxy.
+
+```bash
+# Export the entire registry to JSON
+curl http://127.0.0.1:8000/admin/export > database.json
+
+# Import from JSON (upsert — safe to run repeatedly)
+curl -X POST http://127.0.0.1:8000/admin/import \
+  -H "Content-Type: application/json" \
+  -d @database.json
+```
+
+The format is fully reflexive: export produces exactly what import consumes. See [`docs/EXPORT_FORMAT.md`](docs/EXPORT_FORMAT.md) for the JSON schema.
+
 ## API Endpoints
 
 | Method | Endpoint | Auth | Description |
@@ -160,6 +176,8 @@ curl -X POST http://localhost:8000/release \
 | POST | `/auth/register` | None | Create user account |
 | POST | `/auth/login` | None | Get bearer token |
 | GET | `/auth/me` | Required | Current user info |
+| GET | `/admin/export` | Localhost | Export full database as JSON |
+| POST | `/admin/import` | Localhost | Import database from JSON |
 
 ## Project Structure
 
@@ -175,7 +193,8 @@ mrs-server/
 │   │   ├── release.py
 │   │   ├── search.py
 │   │   ├── wellknown.py
-│   │   └── auth.py
+│   │   ├── auth.py
+│   │   └── admin.py
 │   ├── auth/                 # Authentication
 │   │   ├── bearer.py
 │   │   ├── keys.py
