@@ -58,5 +58,9 @@ logs/
 .DS_Store
 Thumbs.db
 
+# Claude Code
+.claude/
+.claude*
+
 # MRS specific
 mrs.db
