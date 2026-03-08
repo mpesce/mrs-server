@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     # Auth
     token_expiry_hours: int = 24 * 7  # 1 week default
     key_cache_ttl_seconds: int = 3600  # 1 hour
+    registration_requires_whitelist: bool = False  # require email in whitelist to register
 
     # For future HTTP signature support
     enable_http_signatures: bool = False

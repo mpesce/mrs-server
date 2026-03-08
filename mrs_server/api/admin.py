@@ -243,3 +243,80 @@ async def import_database(request: Request):
         "tombstones": tomb_count,
         "peers": peer_count,
     }
+
+
+# ---------------------------------------------------------------------------
+# Whitelist management
+# ---------------------------------------------------------------------------
+
+
+@router.get("/whitelist", dependencies=[Depends(require_localhost)])
+async def list_whitelist():
+    """List all whitelisted email addresses."""
+    with get_cursor() as cur:
+        cur.execute("SELECT email, added_at FROM registration_whitelist ORDER BY email")
+        rows = cur.fetchall()
+
+    return {
+        "emails": [{"email": r["email"], "added_at": r["added_at"]} for r in rows],
+    }
+
+
+@router.post("/whitelist", dependencies=[Depends(require_localhost)], status_code=201)
+async def add_to_whitelist(request: Request):
+    """Add an email address to the registration whitelist.
+
+    Accepts ``{"email": "user@example.com"}`` or
+    ``{"emails": ["a@b.com", "c@d.com"]}``.
+    """
+    body = await request.json()
+
+    # Accept single email or list
+    emails: list[str] = []
+    if "email" in body:
+        emails.append(body["email"])
+    if "emails" in body:
+        emails.extend(body["emails"])
+
+    if not emails:
+        raise HTTPException(status_code=400, detail="No email address provided")
+
+    now = datetime.now(timezone.utc).isoformat()
+    added = 0
+
+    with get_cursor() as cur:
+        for email in emails:
+            normalised = email.strip().lower()
+            if not normalised or "@" not in normalised:
+                raise HTTPException(
+                    status_code=400, detail=f"Invalid email address: {email}"
+                )
+            cur.execute(
+                """
+                INSERT INTO registration_whitelist (email, added_at)
+                VALUES (?, ?)
+                ON CONFLICT(email) DO NOTHING
+                """,
+                (normalised, now),
+            )
+            added += cur.rowcount
+
+    return {"status": "added", "added": added}
+
+
+@router.delete("/whitelist/{email}", dependencies=[Depends(require_localhost)])
+async def remove_from_whitelist(email: str):
+    """Remove an email address from the registration whitelist."""
+    normalised = email.strip().lower()
+
+    if not normalised:
+        raise HTTPException(status_code=400, detail="No email address provided")
+
+    with get_cursor() as cur:
+        cur.execute(
+            "DELETE FROM registration_whitelist WHERE email = ?", (normalised,)
+        )
+        if cur.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Email not in whitelist")
+
+    return {"status": "removed", "email": normalised}
