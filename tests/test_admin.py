@@ -4,7 +4,11 @@ import json
 
 import pytest
 
-from mrs_server.api.admin import require_localhost
+def _get_require_localhost():
+    """Get the current require_localhost dependency (survives module reloads)."""
+    from mrs_server.api.admin import require_localhost
+
+    return require_localhost
 
 
 @pytest.fixture(autouse=True)
@@ -15,9 +19,10 @@ def _allow_test_client(client):
     async def _noop():
         pass
 
-    app.dependency_overrides[require_localhost] = _noop
+    guard = _get_require_localhost()
+    app.dependency_overrides[guard] = _noop
     yield
-    app.dependency_overrides.pop(require_localhost, None)
+    app.dependency_overrides.pop(guard, None)
 
 
 class TestLocalhostGuard:
@@ -28,7 +33,7 @@ class TestLocalhostGuard:
         from mrs_server.main import app
 
         # Remove the override so the real guard runs
-        app.dependency_overrides.pop(require_localhost, None)
+        app.dependency_overrides.pop(_get_require_localhost(), None)
 
         response = client.get("/admin/export")
         assert response.status_code == 403
@@ -38,7 +43,7 @@ class TestLocalhostGuard:
         """When the guard is restored, non-localhost should be 403."""
         from mrs_server.main import app
 
-        app.dependency_overrides.pop(require_localhost, None)
+        app.dependency_overrides.pop(_get_require_localhost(), None)
 
         response = client.post(
             "/admin/import",
