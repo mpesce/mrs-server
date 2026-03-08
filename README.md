@@ -85,6 +85,9 @@ export MRS_PORT="8000"
 # Database
 export MRS_DATABASE_PATH="./mrs.db"
 
+# Registration whitelist (optional — restricts who can create accounts)
+export MRS_REGISTRATION_REQUIRES_WHITELIST="true"
+
 # Optional: Federation peers
 export MRS_BOOTSTRAP_PEERS='["https://peer1.example.com", "https://peer2.example.com"]'
 ```
@@ -98,16 +101,18 @@ Or create a `.env` file in the project root. Command line arguments override env
 First, create an account and get a token:
 
 ```bash
-# Register
+# Register (email is required)
 curl -X POST http://localhost:8000/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"username": "alice", "password": "secretpassword"}'
+  -d '{"username": "alice", "password": "secretpassword", "email": "alice@example.com"}'
 
 # Login (returns bearer token)
 curl -X POST http://localhost:8000/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "alice", "password": "secretpassword"}'
 ```
+
+Registration requires a valid email address. Server operators can restrict registration to pre-approved emails using an email whitelist — see [USER_AUTH.md](USER_AUTH.md) for details.
 
 ### Register a Space
 
@@ -178,6 +183,11 @@ The format is fully reflexive: export produces exactly what import consumes. See
 | GET | `/auth/me` | Required | Current user info |
 | GET | `/admin/export` | Localhost | Export full database as JSON |
 | POST | `/admin/import` | Localhost | Import database from JSON |
+| GET | `/admin/whitelist` | Localhost | List whitelisted emails |
+| POST | `/admin/whitelist` | Localhost | Add email(s) to whitelist |
+| DELETE | `/admin/whitelist/{email}` | Localhost | Remove email from whitelist |
+
+For full authentication and authorisation documentation, see [USER_AUTH.md](USER_AUTH.md).
 
 ## Project Structure
 

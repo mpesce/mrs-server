@@ -32,5 +32,7 @@ Create a user/token:
 ```bash
 curl -X POST http://127.0.0.1:8000/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"username":"alice","password":"password123"}'
+  -d '{"username":"alice","password":"password123","email":"alice@example.com"}'
 ```
+
+To restrict registration to approved emails, see [USER_AUTH.md](USER_AUTH.md).
