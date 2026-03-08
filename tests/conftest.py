@@ -41,7 +41,33 @@ def client(temp_db_path):
     # Reload config to pick up new environment
     importlib.reload(mrs_server.config)
 
-    # Reload main to get fresh lifespan
+    # Reload every module that imports settings so they pick up the new value.
+    # Order: leaf modules first, then packages that re-export them.
+    import mrs_server.auth.bearer
+    import mrs_server.auth.keys
+    import mrs_server.auth.dependencies
+    import mrs_server.auth
+    import mrs_server.api.auth
+    import mrs_server.api.register
+    import mrs_server.api.release
+    import mrs_server.api.search
+    import mrs_server.api.wellknown
+    import mrs_server.api.admin
+    import mrs_server.api
+
+    importlib.reload(mrs_server.auth.bearer)
+    importlib.reload(mrs_server.auth.keys)
+    importlib.reload(mrs_server.auth.dependencies)
+    importlib.reload(mrs_server.auth)
+    importlib.reload(mrs_server.api.auth)
+    importlib.reload(mrs_server.api.register)
+    importlib.reload(mrs_server.api.release)
+    importlib.reload(mrs_server.api.search)
+    importlib.reload(mrs_server.api.wellknown)
+    importlib.reload(mrs_server.api.admin)
+    importlib.reload(mrs_server.api)
+
+    # Reload main to get fresh lifespan and router wiring
     import mrs_server.main
 
     importlib.reload(mrs_server.main)

@@ -9,7 +9,12 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
-from mrs_server.api.admin import require_localhost
+
+def _get_require_localhost():
+    """Get the current require_localhost dependency (survives module reloads)."""
+    from mrs_server.api.admin import require_localhost
+
+    return require_localhost
 
 
 @pytest.fixture(scope="function")
@@ -53,13 +58,14 @@ def whitelist_client():
     async def _noop():
         pass
 
-    app.dependency_overrides[require_localhost] = _noop
+    guard = _get_require_localhost()
+    app.dependency_overrides[guard] = _noop
 
     with TestClient(app) as test_client:
         yield test_client
 
     mrs_server.database.close_database()
-    app.dependency_overrides.pop(require_localhost, None)
+    app.dependency_overrides.pop(guard, None)
 
     # Clean up env
     os.environ.pop("MRS_REGISTRATION_REQUIRES_WHITELIST", None)
@@ -75,9 +81,10 @@ def _allow_admin(client):
     async def _noop():
         pass
 
-    app.dependency_overrides[require_localhost] = _noop
+    guard = _get_require_localhost()
+    app.dependency_overrides[guard] = _noop
     yield
-    app.dependency_overrides.pop(require_localhost, None)
+    app.dependency_overrides.pop(guard, None)
 
 
 class TestWhitelistDisabled:
@@ -272,7 +279,7 @@ class TestWhitelistAdminEndpoints:
         from mrs_server.main import app
 
         # Remove the override so the real guard runs
-        app.dependency_overrides.pop(require_localhost, None)
+        app.dependency_overrides.pop(_get_require_localhost(), None)
 
         response = client.get("/admin/whitelist")
         assert response.status_code == 403
