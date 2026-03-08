@@ -3,6 +3,7 @@
 from .bearer import (
     AuthError,
     authenticate_user,
+    check_whitelist,
     cleanup_expired_tokens,
     create_token,
     create_user,
@@ -15,6 +16,7 @@ from .keys import ensure_server_key, get_public_key, get_server_key
 
 __all__ = [
     "AuthError",
+    "check_whitelist",
     "create_user",
     "authenticate_user",
     "create_token",

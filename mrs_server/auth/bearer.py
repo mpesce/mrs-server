@@ -34,7 +34,26 @@ def generate_token() -> str:
     return secrets.token_urlsafe(32)
 
 
-def create_user(username: str, password: str, domain: str) -> str:
+def check_whitelist(email: str) -> None:
+    """
+    Check if an email is in the registration whitelist.
+
+    Raises:
+        AuthError: If whitelist is enabled and the email is not whitelisted
+    """
+    if not settings.registration_requires_whitelist:
+        return
+
+    with get_cursor() as cursor:
+        cursor.execute(
+            "SELECT email FROM registration_whitelist WHERE email = ?",
+            (email.lower(),),
+        )
+        if not cursor.fetchone():
+            raise AuthError("Email address is not authorised to register", 403)
+
+
+def create_user(username: str, password: str, domain: str, email: str) -> str:
     """
     Create a new local user.
 
@@ -42,13 +61,17 @@ def create_user(username: str, password: str, domain: str) -> str:
         username: The username (without domain)
         password: The plaintext password
         domain: The server domain
+        email: The user's email address
 
     Returns:
         The full MRS identity (user@domain)
 
     Raises:
-        AuthError: If user already exists
+        AuthError: If user already exists or email not whitelisted
     """
+    # Check whitelist before creating user
+    check_whitelist(email)
+
     identity = f"{username}@{domain}"
     now = datetime.now(timezone.utc).isoformat()
 
@@ -61,10 +84,10 @@ def create_user(username: str, password: str, domain: str) -> str:
         # Create user
         cursor.execute(
             """
-            INSERT INTO users (id, password_hash, created_at, is_local)
-            VALUES (?, ?, ?, 1)
+            INSERT INTO users (id, password_hash, email, created_at, is_local)
+            VALUES (?, ?, ?, ?, 1)
             """,
-            (identity, hash_password(password), now),
+            (identity, hash_password(password), email.lower(), now),
         )
 
     return identity

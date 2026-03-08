@@ -68,11 +68,19 @@ CREATE INDEX IF NOT EXISTS idx_tombstones_deleted_at ON tombstones(deleted_at);
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,                    -- MRS identity (user@domain)
     password_hash TEXT,                     -- bcrypt hash, for local users
+    email TEXT,                             -- email address, for local users
     created_at TEXT NOT NULL,
     is_local INTEGER NOT NULL DEFAULT 0     -- 1 if this server manages this identity
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_local ON users(is_local);
+
+-- Registration whitelist: email addresses allowed to register
+CREATE TABLE IF NOT EXISTS registration_whitelist (
+    email TEXT PRIMARY KEY,                 -- normalised lowercase email
+    added_at TEXT NOT NULL                  -- ISO 8601
+);
+
 
 -- Keys: cryptographic keys for identities
 -- Note: No foreign key on owner because keys can belong to "_server" or federated identities
@@ -147,6 +155,15 @@ def _ensure_registration_columns(conn: sqlite3.Connection) -> None:
     conn.execute("UPDATE registrations SET version = 1 WHERE version IS NULL OR version < 1")
 
 
+def _ensure_user_columns(conn: sqlite3.Connection) -> None:
+    """Ensure backward-compatible presence of newer users columns."""
+    cur = conn.execute("PRAGMA table_info(users)")
+    cols = {row[1] for row in cur.fetchall()}
+
+    if "email" not in cols:
+        conn.execute("ALTER TABLE users ADD COLUMN email TEXT")
+
+
 def init_database(db_path: str | Path) -> None:
     """Initialize the database with the MRS schema."""
     global _db_path, _connection
@@ -161,6 +178,7 @@ def init_database(db_path: str | Path) -> None:
     # Create schema
     _connection.executescript(SCHEMA)
     _ensure_registration_columns(_connection)
+    _ensure_user_columns(_connection)
     _connection.commit()
 
 

@@ -62,7 +62,11 @@ def auth_token(client):
     username = f"testuser_{uuid.uuid4().hex[:8]}"
     response = client.post(
         "/auth/register",
-        json={"username": username, "password": "testpassword123"},
+        json={
+            "username": username,
+            "password": "testpassword123",
+            "email": f"{username}@example.com",
+        },
     )
     assert response.status_code == 201, f"Failed to register user: {response.json()}"
     return response.json()["token"]
@@ -80,12 +84,17 @@ def test_user(client):
     username = f"testuser_{uuid.uuid4().hex[:8]}"
     response = client.post(
         "/auth/register",
-        json={"username": username, "password": "testpassword123"},
+        json={
+            "username": username,
+            "password": "testpassword123",
+            "email": f"{username}@example.com",
+        },
     )
     assert response.status_code == 201
     return {
         "username": username,
         "password": "testpassword123",
+        "email": f"{username}@example.com",
         "token": response.json()["token"],
         "identity": f"{username}@testserver",
     }

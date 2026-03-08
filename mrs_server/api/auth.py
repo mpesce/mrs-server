@@ -35,6 +35,7 @@ async def register_user(request: UserRegisterRequest) -> TokenResponse:
             username=request.username,
             password=request.password,
             domain=settings.server_domain,
+            email=request.email,
         )
     except AuthError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)

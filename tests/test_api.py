@@ -32,7 +32,11 @@ class TestAuth:
         """Should be able to register a new user."""
         response = client.post(
             "/auth/register",
-            json={"username": "newuser", "password": "password123"},
+            json={
+                "username": "newuser",
+                "password": "password123",
+                "email": "newuser@example.com",
+            },
         )
         assert response.status_code == 201
         data = response.json()
@@ -43,14 +47,22 @@ class TestAuth:
         # Register first
         response1 = client.post(
             "/auth/register",
-            json={"username": "duplicateuser", "password": "password123"},
+            json={
+                "username": "duplicateuser",
+                "password": "password123",
+                "email": "dup@example.com",
+            },
         )
         assert response1.status_code == 201
 
         # Try to register same username again
         response2 = client.post(
             "/auth/register",
-            json={"username": "duplicateuser", "password": "password123"},
+            json={
+                "username": "duplicateuser",
+                "password": "password123",
+                "email": "dup@example.com",
+            },
         )
         assert response2.status_code == 400
 

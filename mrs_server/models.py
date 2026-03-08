@@ -189,6 +189,19 @@ class UserRegisterRequest(BaseModel):
 
     username: str = Field(..., min_length=1, max_length=64, pattern=r"^[a-zA-Z0-9_-]+$")
     password: str = Field(..., min_length=8, max_length=128)
+    email: str = Field(..., min_length=3, max_length=254)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        """Basic email format validation."""
+        v = v.strip().lower()
+        if "@" not in v or v.count("@") != 1:
+            raise ValueError("Invalid email address")
+        local, domain = v.split("@")
+        if not local or not domain or "." not in domain:
+            raise ValueError("Invalid email address")
+        return v
 
 
 class UserLoginRequest(BaseModel):
