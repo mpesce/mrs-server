@@ -68,7 +68,13 @@ The difference: real, current, authoritative information from the people who con
 
 The skill definition lives in this repository at [`docs/AGENT_SKILL.md`](docs/AGENT_SKILL.md). It contains everything your agent needs: endpoint descriptions, request/response schemas, error handling, common workflows, and practical reference data.
 
-You can use it directly from the repo:
+You can grab it from the canonical MRS server:
+
+```bash
+curl -O https://owen.iz.net/skill/
+```
+
+Or directly from the repo:
 
 ```bash
 curl -O https://raw.githubusercontent.com/mpesce/mrs-server/main/docs/AGENT_SKILL.md
