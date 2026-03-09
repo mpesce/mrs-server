@@ -66,7 +66,7 @@ The difference: real, current, authoritative information from the people who con
 
 ### Step 1: Get the Skill File
 
-The skill definition lives in this repository at [`docs/AGENT_SKILL.md`](docs/AGENT_SKILL.md). It contains everything your agent needs: endpoint descriptions, request/response schemas, error handling, common workflows, and practical reference data.
+The skill definition lives in this repository at [`docs/SKILL.md`](docs/SKILL.md). It contains everything your agent needs: endpoint descriptions, request/response schemas, error handling, common workflows, and practical reference data.
 
 You can grab it from the canonical MRS server:
 
@@ -77,7 +77,7 @@ curl -O https://owen.iz.net/skill/
 Or directly from the repo:
 
 ```bash
-curl -O https://raw.githubusercontent.com/mpesce/mrs-server/main/docs/AGENT_SKILL.md
+curl -O https://raw.githubusercontent.com/mpesce/mrs-server/main/docs/SKILL.md
 ```
 
 Or just copy the file from your local clone.
@@ -88,14 +88,14 @@ How you load the skill depends on your agent framework. Here are the most common
 
 #### Claude (via Claude Code or API)
 
-Place `AGENT_SKILL.md` in your project root or a `skills/` directory. Claude Code will pick it up automatically. For the API, include it in your system prompt or as a document attachment.
+Place `SKILL.md` in your project root or a `skills/` directory. Claude Code will pick it up automatically. For the API, include it in your system prompt or as a document attachment.
 
 ```python
 # Claude API — include as part of the system prompt
 from anthropic import Anthropic
 
 client = Anthropic()
-skill = open("AGENT_SKILL.md").read()
+skill = open("SKILL.md").read()
 
 response = client.messages.create(
     model="claude-sonnet-4-20250514",
@@ -112,7 +112,7 @@ Include the skill file content in your system message:
 from openai import OpenAI
 
 client = OpenAI()
-skill = open("AGENT_SKILL.md").read()
+skill = open("SKILL.md").read()
 
 response = client.chat.completions.create(
     model="gpt-4o",
@@ -274,7 +274,7 @@ Now searches on your server include referrals to the public network, and vice ve
 ## Further Reading
 
 - [**Agents in Space**](Agents-in-Space.md) — The vision: why AI agents need spatial awareness
-- [**Agent Skill Reference**](docs/AGENT_SKILL.md) — The complete skill file your agent consumes
+- [**Agent Skill Reference**](docs/SKILL.md) — The complete skill file your agent consumes
 - [**MRS Protocol Spec**](MRS-SPEC-DRAFT.md) — The full protocol specification
 - [**About MRS**](ABOUT.md) — The thirty-year history from VRML to spatial agents
 - [**Quick Start**](QUICKSTART.md) — Run your own MRS server in 90 seconds

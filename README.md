@@ -28,7 +28,7 @@ cd mrs-server
 
 For a short walkthrough, see [QUICKSTART.md](QUICKSTART.md).
 
-For AI agent integration, see [`docs/AGENT_SKILL.md`](docs/AGENT_SKILL.md) — a capability document that teaches agents how to interact with MRS servers.
+For AI agent integration, see [`docs/SKILL.md`](docs/SKILL.md) — a capability document that teaches agents how to interact with MRS servers.
 
 For static read-only export (Level 0), see [`docs/STATIC_LEVEL0.md`](docs/STATIC_LEVEL0.md).
 
