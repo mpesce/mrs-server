@@ -301,6 +301,79 @@ class TestRegistration:
         )
         assert response.status_code == 422
 
+    def test_register_rejects_duplicate(self, client, auth_headers):
+        """Should reject a registration that duplicates an existing one."""
+        payload = {
+            "space": {
+                "type": "sphere",
+                "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                "radius": 50,
+            },
+            "service_point": "https://example.com/my-space",
+            "foad": False,
+        }
+        # First registration succeeds
+        r1 = client.post("/register", headers=auth_headers, json=payload)
+        assert r1.status_code == 201
+        first_id = r1.json()["registration"]["id"]
+
+        # Identical registration is rejected as duplicate
+        r2 = client.post("/register", headers=auth_headers, json=payload)
+        assert r2.status_code == 409
+        assert first_id in r2.json()["detail"]
+
+    def test_register_allows_different_service_point_same_location(self, client, auth_headers):
+        """Same location but different service_point is NOT a duplicate."""
+        base = {
+            "space": {
+                "type": "sphere",
+                "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                "radius": 50,
+            },
+            "foad": False,
+        }
+        r1 = client.post(
+            "/register", headers=auth_headers, json={**base, "service_point": "https://example.com/a"}
+        )
+        assert r1.status_code == 201
+
+        r2 = client.post(
+            "/register", headers=auth_headers, json={**base, "service_point": "https://example.com/b"}
+        )
+        assert r2.status_code == 201
+
+    def test_register_allows_same_service_point_different_location(self, client, auth_headers):
+        """Same service_point at a different location is NOT a duplicate."""
+        r1 = client.post(
+            "/register",
+            headers=auth_headers,
+            json={
+                "space": {
+                    "type": "sphere",
+                    "center": {"lat": -33.8568, "lon": 151.2153, "ele": 0},
+                    "radius": 50,
+                },
+                "service_point": "https://example.com/multi",
+                "foad": False,
+            },
+        )
+        assert r1.status_code == 201
+
+        r2 = client.post(
+            "/register",
+            headers=auth_headers,
+            json={
+                "space": {
+                    "type": "sphere",
+                    "center": {"lat": 40.7484, "lon": -73.9857, "ele": 0},
+                    "radius": 50,
+                },
+                "service_point": "https://example.com/multi",
+                "foad": False,
+            },
+        )
+        assert r2.status_code == 201
+
     def test_register_rejects_fragment_in_service_point(self, client, auth_headers):
         """Should reject service_point URIs with fragments."""
         response = client.post(
