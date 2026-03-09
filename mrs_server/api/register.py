@@ -64,6 +64,37 @@ async def create_registration(
                     detail=f"Maximum registrations ({settings.max_registrations_per_user}) reached",
                 )
 
+    # Reject duplicate registrations (same owner, location, radius, service_point)
+    with get_cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT id FROM registrations
+            WHERE owner = ?
+              AND center_lat = ?
+              AND center_lon = ?
+              AND center_ele = ?
+              AND radius = ?
+              AND service_point = ?
+              AND foad = ?
+            LIMIT 1
+            """,
+            (
+                user.id,
+                request.space.center.lat,
+                request.space.center.lon,
+                request.space.center.ele,
+                request.space.radius,
+                request.service_point,
+                int(request.foad),
+            ),
+        )
+        existing = cursor.fetchone()
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Duplicate registration already exists with id {existing['id']}",
+            )
+
     # Compute bounding box for spatial indexing
     bbox = compute_bounding_box(request.space)
 
