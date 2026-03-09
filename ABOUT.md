@@ -24,7 +24,7 @@ But Labyrinth was only the visible part. The paper Pesce was writing — the one
 
 Pesce sent a note to "this guy in Switzerland" — Tim Berners-Lee — who had been asking about VR on the web. Berners-Lee wrote back with an invitation: come present at the **First International Conference on the World Wide Web**, WWW1, in Geneva.
 
-In May 1994, Pesce, Parisi, and Peter Kennard [presented Labyrinth](http://hyperreal.org/~mpesce/www.html) and Cyberspace Protocol to the assembled web pioneers. The demo caught the eye of Silicon Graphics, then the most powerful 3D graphics company in the world. Dave Raggett, a web standards pioneer, coined the term **VRML** — Virtual Reality Modeling Language — at a Birds of a Feather session Tim Berners-Lee had convened.
+In May 1994, Mark Pesce [presented Labyrinth](http://hyperreal.org/~mpesce/www.html) and Cyberspace Protocol to the assembled web pioneers, with Tony Parisi and Peter Kennard as co-authors. The demo caught the eye of Silicon Graphics, then the most powerful 3D graphics company in the world. Dave Raggett, a web standards pioneer, coined the term **VRML** — Virtual Reality Modeling Language — at a Birds of a Feather session Tim Berners-Lee had convened.
 
 What happened next is well documented: VRML exploded. Silicon Graphics' Rikk Carey and Gavin Bell joined Pesce and Parisi. Microsoft, Netscape, Sun, and Sony piled in. VRML became an ISO standard. The 3D web was born.
 
@@ -128,13 +128,14 @@ It's time to fix that.
 
 MRS exists because of the work of many people across three decades:
 
-- **Mark Pesce** — Co-inventor of VRML. Author of the original Cyberspace Protocol (1994), the Mixed Reality Service specification (2016), and the current MRS server implementation.
-- **Tony Parisi** — Co-inventor of VRML. Built the first VRML parser. Presented the MRS proposal to the W3C WebVR Community Group in 2016.
-- **Peter Kennard** — Co-presenter of Labyrinth at WWW1 in Geneva, 1994.
+- **Mark Pesce** — Co-inventor of VRML. Author of the original Cyberspace Protocol (1994), the Mixed Reality Service specification (2016), and the current MRS server implementation. Sole presenter of the WWW1 paper in Geneva.
+- **Tony Parisi** — Co-inventor of VRML. Built the first VRML parser and co-authored the WWW1 Cyberspace Protocol paper. Presented the MRS proposal to the W3C WebVR Community Group in 2016.
+- **Peter Kennard** — Co-author of the WWW1 Cyberspace Protocol paper and contributor to Labyrinth.
 - **Owen Rowley** — Early VRML community contributor and collaborator.
 - **Sir Tim Berners-Lee** — Invited Pesce to present at WWW1. Convened the VRML Birds of a Feather session.
 - **Dave Raggett** — Coined the term "VRML" at WWW1.
 - **Rikk Carey & Gavin Bell** (Silicon Graphics) — Contributed Open Inventor as the basis for VRML 1.0.
+- **Brian Behlendorf** — Facilitated the meeting with Rikk Carey and Gavin Bell at SIGGRAPH 1994; later known as the creator of Apache.
 
 And the global community of VRML enthusiasts, WebVR pioneers, and spatial computing researchers who kept the idea alive across the decades when the world wasn't ready for it.
 
